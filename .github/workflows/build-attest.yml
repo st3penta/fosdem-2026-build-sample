@@ -44,7 +44,6 @@ jobs:
         uses: actions/attest-sbom@v2
         with:
           subject-path: "build-sample"
-          sbom-path: "build-sample-sbom.spdx.json"
 
       - name: Upload binary as artifact
         uses: actions/upload-artifact@v6
