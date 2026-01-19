@@ -33,6 +33,7 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           file: ./build-sample
+          output-file: build-sample-sbom.spdx.json
           artifact-name: "build-sample-sbom.spdx.json"
 
       - name: Generate build provenance attestation
@@ -44,15 +45,10 @@ jobs:
         uses: actions/attest-sbom@v2
         with:
           subject-path: "build-sample"
+          sbom-path: "build-sample-sbom.spdx.json"
 
       - name: Upload binary as artifact
         uses: actions/upload-artifact@v6
         with:
           name: build-sample-binary
           path: build-sample
-
-      - name: Upload SBOM as artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: build-sample-sbom
-          path: build-sample-sbom.spdx.json
