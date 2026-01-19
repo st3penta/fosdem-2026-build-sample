@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/rs/zerolog/log"
+)
 
 func main() {
-	fmt.Println("Hello, World! I'm a build sample")
+	log.Print("Hello, World! I'm a build sample")
 }
