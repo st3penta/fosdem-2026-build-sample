@@ -84,12 +84,14 @@ jobs:
             --type spdx \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
 
-      - name: Generate and attest SLSA provenance with Cosign
+      - name: Generate SLSA provenance with GitHub action
+        uses: actions/attest-build-provenance/predicate@v3
+        id: provenance
+
+      - name: Attest SLSA provenance with Cosign
         run: |
+          echo '${{ steps.provenance.outputs.predicate }}' > provenance.json
           cosign attest --yes \
-            --predicate <(cosign generate-slsa-provenance \
-              --repo ${{ github.repository }} \
-              --run-id ${{ github.run_id }} \
-              --sha ${{ github.sha }}) \
-            --type slsaprovenance \
+            --predicate provenance.json \
+            --type slsaprovenance1 \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
