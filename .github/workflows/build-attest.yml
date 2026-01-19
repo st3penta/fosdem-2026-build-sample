@@ -65,9 +65,23 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
+      - name: Generate SBOM for container image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          output-file: build-sample-sbom.spdx.json
+          artifact-name: "build-sample-sbom.spdx.json"
+
       - name: Sign container image with Cosign
         run: |
           cosign sign --yes \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+
+      - name: Attest SBOM with Cosign
+        run: |
+          cosign attest --yes \
+            --predicate build-sample-sbom.spdx.json \
+            --type spdx \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
 
       - name: Generate SLSA provenance with GitHub action
