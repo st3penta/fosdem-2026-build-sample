@@ -125,19 +125,16 @@ jobs:
             --show-successes
             --strict=true
             --output text
+            --output text=log.md
 
-      - name: Add validation output to summary
-        if: always()
-        run: |
-          echo "## Conforma Validation Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.validate.outputs.stdout }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Output summary
+        run: cat log.md >> $GITHUB_STEP_SUMMARY
+        shell: bash
 
-      - name: Fail if validation failed
-        if: steps.validate.outcome != 'success'
+      - name: Fail if validate failed
+        if: steps.ec_validate.outcome != 'success'
         run: exit 1
+        shell: bash
 
   promote:
     runs-on: ubuntu-latest
