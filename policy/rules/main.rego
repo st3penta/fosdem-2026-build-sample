@@ -41,6 +41,16 @@ deny contains result if {
 	att.statement.predicateType == "https://slsa.dev/provenance/v1"
 	builder_id := att.statement.predicate.runDetails.builder.id
 
-	not builder_id in allowed_builder_ids
+	not is_builder_id_allowed(builder_id, allowed_builder_ids)
 	result := lib.result_helper(rego.metadata.chain(), [builder_id])
+}
+
+# Check if builder_id matches any allowed pattern (exact or regex)
+is_builder_id_allowed(builder_id, allowed_ids) if {
+	some allowed_id in allowed_ids
+	builder_id == allowed_id
+} else if {
+	some allowed_id in allowed_ids
+	startswith(allowed_id, "^")
+	regex.match(allowed_id, builder_id)
 }
