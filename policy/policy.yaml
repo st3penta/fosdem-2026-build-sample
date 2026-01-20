@@ -1,4 +1,0 @@
-sources:
-  - policy:
-      - ./policy/rules
-      - ./policy/lib
