@@ -50,11 +50,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch,suffix=-unverified
-            type=ref,event=pr,suffix=-unverified
-            type=sha,prefix={{branch}}-,suffix=-unverified
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
 
-      - name: Build and push container image (unverified)
+      - name: Build and push container image
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -149,8 +149,8 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Tag validated image as v1.0.0
+      - name: Tag validated image as latest
         run: |
           skopeo copy \
             docker://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }} \
-            docker://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v1.0.0
+            docker://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
