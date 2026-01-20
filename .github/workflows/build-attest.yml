@@ -110,6 +110,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate image with Conforma
+        id: validate
+        continue-on-error: true
         uses: docker://quay.io/conforma/cli:snapshot@sha256:867304d48d9af0e583ef7d04fdd8b33f071cfba65ba1b1ab658b39a14080e348
         with:
           args: >
@@ -123,6 +125,19 @@ jobs:
             --show-successes
             --strict=true
             --output text
+
+      - name: Add validation output to summary
+        if: always()
+        run: |
+          echo "## Conforma Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.validate.outputs.stdout }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if validation failed
+        if: steps.validate.outcome != 'success'
+        run: exit 1
 
   promote:
     runs-on: ubuntu-latest
