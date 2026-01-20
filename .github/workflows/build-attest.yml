@@ -109,24 +109,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Conforma
-        run: |
-          curl -sL https://github.com/conforma/cli/releases/latest/download/ec_linux_amd64.tar.gz | tar xz
-          sudo mv ec /usr/local/bin/
-          ec version
-
-      - name: Validate image with Conforma policy
-        run: |
-          ec validate image \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }} \
-            --policy ./policy/policy.yaml \
-            --certificate-identity-regexp '^https://github\.com/st3penta/fosdem-2026-build-sample/' \
-            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-            --ignore-rekor=false \
-            --info \
-            --show-successes \
-            --strict=false \
-            --output text
+      - name: Validate image with Conforma
+        uses: conforma/action-validate-image@v1.0.419
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }}
+          identity: https:\/\/github\.com\/${{ github.repository_owner }}\/${{ github.event.repository.name }}\/
+          issuer: https://token.actions.githubusercontent.com
+          policy: policy/policy.yaml
 
   promote:
     runs-on: ubuntu-latest
