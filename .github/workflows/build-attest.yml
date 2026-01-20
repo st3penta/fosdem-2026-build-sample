@@ -10,8 +10,11 @@ env:
   IMAGE_NAME: spentass/fosdem-2026
 
 jobs:
-  build:
+  build-and-attest:
     runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+      tags: ${{ steps.meta.outputs.tags }}
 
     permissions:
       id-token: write
@@ -47,12 +50,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch,suffix=-unverified
+            type=ref,event=pr,suffix=-unverified
+            type=sha,prefix={{branch}}-,suffix=-unverified
 
-      - name: Build and push container image
+      - name: Build and push container image (unverified)
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -95,3 +97,52 @@ jobs:
             --predicate provenance.json \
             --type slsaprovenance1 \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: build-and-attest
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Conforma
+        run: |
+          curl -sL https://github.com/conforma/cli/releases/latest/download/ec_linux_amd64.tar.gz | tar xz
+          sudo mv ec /usr/local/bin/
+          ec version
+
+      - name: Validate image with Conforma policy
+        run: |
+          ec validate image \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }} \
+            --policy ./policy/policy.yaml \
+            --certificate-identity-regexp '^https://github\.com/st3penta/fosdem-2026-build-sample/' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+            --ignore-rekor=false \
+            --info \
+            --show-successes \
+            --strict=false \
+            --output text
+
+  promote:
+    runs-on: ubuntu-latest
+    needs: [build-and-attest, validate]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Log in to Quay
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Tag validated image as v1.0.0
+        run: |
+          skopeo copy \
+            docker://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }} \
+            docker://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v1.0.0

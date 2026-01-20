@@ -1,16 +1,12 @@
 sources:
   - policy:
-      - oci::quay.io/enterprise-contract/ec-release-policy:latest
-
-    config:
-      include:
-        - slsa_build_build_service.slsa_builder_id_found
-        - slsa_build_build_service.allowed_builder_ids_provided
+      - ./policy/rules
+      - ./policy/lib
 
     ruleData:
       disallowed_packages:
-        - purl: "pkg:oci/critical-cve-package"
+        - purl: "pkg:golang/github.com/rs/zerolog"
           format: "semver"
           max: "1.30.0"
       allowed_builder_ids:
-        - tbd
+        - https://github.com/st3penta/fosdem-2026-build-sample/.github/workflows/build-attest.yml@refs/heads/main
