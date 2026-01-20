@@ -2,6 +2,8 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
 
 env:
   REGISTRY: quay.io
