@@ -7,6 +7,6 @@ sources:
       disallowed_packages:
         - purl: "pkg:golang/github.com/rs/zerolog"
           format: "semver"
-          max: "1.31.0"
+          max: "1.30.0"
       allowed_builder_ids:
-        - https://github.com/st3penta/fosdem-2026-build-sample/.github/workflows/pr-build.yml@refs/pull/
+        - https://github.com/st3penta/fosdem-2026-build-sample/.github/workflows/pull_request.yml@refs/pull/
