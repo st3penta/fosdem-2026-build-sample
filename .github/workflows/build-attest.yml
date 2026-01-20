@@ -132,7 +132,7 @@ jobs:
         shell: bash
 
       - name: Fail if validate failed
-        if: steps.ec_validate.outcome != 'success'
+        if: steps.validate.outcome != 'success'
         run: exit 1
         shell: bash
 
