@@ -2,7 +2,7 @@ module build-sample
 
 go 1.24.3
 
-require github.com/rs/zerolog v1.30.0
+require github.com/rs/zerolog v1.31.0
 
 require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
