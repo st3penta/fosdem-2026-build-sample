@@ -8,7 +8,7 @@ import rego.v1
 # title: Allowed
 # description: Confirm the SPDX SBOM contains only allowed packages
 # custom:
-#   short_name: allowed
+#   short_name: allowed_packages
 #   failure_msg: "Package is not allowed: %s"
 #   solution: Update the image to not use any disallowed package
 #

@@ -2,8 +2,6 @@ name: Build and Attest
 
 on:
   push:
-  pull_request:
-  workflow_dispatch:
 
 env:
   REGISTRY: quay.io
@@ -117,6 +115,7 @@ jobs:
           args: >
             validate image
             --policy "policy/policy.yaml"
+            --rule-data "policy/rule_data_release.yaml"
             --image "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-attest.outputs.digest }}"
             --certificate-identity-regexp "^https://github\.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/"
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
